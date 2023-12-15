@@ -1,5 +1,6 @@
 <script lang="ts">
-import { defineEmits } from 'vue';
+import { defineEmits, defineProps } from 'vue';
+const {item} = defineProps(['item'])
 const emit = defineEmits(["onGoBasket"]);
 const goBasket = (): void => {
   emit("onGoBasket");
@@ -7,13 +8,13 @@ const goBasket = (): void => {
 </script>
 <template>
   <div class="contextWrapper">
-    <div class="contextItem">
+    <div v-for="data in item" :key="data.id" class="contextItem">
       <div class="image">
-        <img src="" alt="" />
+        <img :src="data.img" alt="" />
       </div>
       <div class="content">
-        <div class="title">Title</div>
-        <div class="price">10$</div>
+        <div class="title">{{data.title}}</div>
+        <div class="price">{{data.price}}$</div>
       </div>
     </div>
     <div @click="goBasket" class="contextItem completeBox">complete the shopping</div>

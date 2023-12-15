@@ -1,6 +1,6 @@
 <template>
   <div class="productCard">
-    <div class="box">
+    <div @click="onClickBox" class="box">
       <svg
         viewBox="0 0 24 24"
         width="16"
@@ -17,18 +17,26 @@
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
       </svg>
     </div>
-    <div class="cardImage"></div>
+    <div class="cardImage">
+        <img :src="item.image" alt="">
+    </div>
     <div class="desc">
-      <div class="btn">Detail</div>
-      <span>Title</span>
-      <div class="price">15$</div>
+      <div @click="router.push('/product-details/' + item.id)" class="btn">Detail</div>
+      <span>{{ item.title }}</span>
+      <div class="price">{{item.price}}$</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import defineProps from 'vue'
+import {useRoute} from "vue-router"
+import {defineProps} from 'vue'
  const {item} = defineProps(['item'])
+ const emit = defineEmits([onItemBox])
+ const router = useRoute();
+ const onClickBox = () => {
+   emit("onItemBox" , item);
+ }
 </script>
 
 <style scoped>

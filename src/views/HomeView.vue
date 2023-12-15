@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import ShopContext from '../components/ShopContext.vue'
-import ProductCard from '../components/ProductCard.vue';
+import ProductCard from '../components/ProductCard.vue'
 // import ProductCard from '../components/ProductCard.vue'
 const show = ref(false)
 const categories = ref([])
 const products = ref([])
 const activeCategory = ref(null)
+const chooseProduct = ref([])
+const onItemFunc = (e) => {
+  chooseProduct.value.push(e)
+}
 const onShow = () => {
   show.value = !show.value
 }
@@ -19,22 +23,40 @@ const fetchCategory = async () => {
   } catch (error) {
     console.log(error)
   }
-  const fetchProduct = async () => {
+}
+const fetchProduct = async () => {
   try {
-    const response = await fetch('https://fakestoreapi.com/products');
+    const response = await fetch('https://fakestoreapi.com/products')
     const jsonData = await response.json()
     products.value = jsonData
     console.log(products.value)
   } catch (error) {
     console.log(error)
   }
-  onMounted(() => {
-    fetchCategory()
-  })
-  onMounted(() => {
-    fetchProduct()
-  })
 }
+const fetchProductByCategory = async (product: string) => {
+  try {
+    const response = await fetch('https://fakestoreapi.com/products/categories' + product)
+    const jsonData = await response.json()
+    categories.value = jsonData
+    console.log(categories.value)
+  } catch (error) {
+    console.log(error)
+  }
+}
+watch(activeCategory, (newVal: any) => {
+  if (newVal === '') {
+    fetchProduct()
+  } else {
+    fetchProductByCategory(newVal)
+  }
+})
+onMounted(() => {
+  fetchCategory()
+})
+onMounted(() => {
+  fetchProduct()
+})
 </script>
 
 <template>
@@ -42,7 +64,7 @@ const fetchCategory = async () => {
     Home Page
     <div class="topFlex">
       <div
-      :class="activeCategory === item ? 'activeCategory':''"
+        :class="activeCategory === item ? 'activeCategory' : ''"
         @click="activeCategory = activeCategory === item ? '' : 'item'"
         v-for="item in category"
         :key="item.id"
@@ -52,29 +74,34 @@ const fetchCategory = async () => {
       </div>
     </div>
     <div class="box">
-      <div class="badge">
-        <svg
-          @click="onShow"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-          stroke="currentColor"
-          stroke-width="2"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="css-i6dzq1"
-        >
-          <circle cx="9" cy="21" r="1"></circle>
-          <circle cx="20" cy="21" r="1"></circle>
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-        </svg>
-        <ShopContext @on-go-basket="show = false" v-if="show" />
-      </div>
+      <div class="badge">{{ chooseProduct.length }}</div>
+      >
+      <svg
+        @click="onShow"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        stroke="currentColor"
+        stroke-width="2"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="css-i6dzq1"
+      >
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      <ShopContext @on-go-basket="show = false" v-if="show" :item="chooseProduct" />
     </div>
   </div>
   <div class="bottomFlex">
-    <ProductCard v-for="item in products" :key="item.id" :item = 'item'/>
+    <ProductCard
+      @on-item-box="onItemFunc($event)"
+      v-for="item in products"
+      :key="item.id"
+      :item="item"
+    />
   </div>
 </template>
 <style scoped>
@@ -129,5 +156,13 @@ const fetchCategory = async () => {
   color: whitesmoke;
   width: 16px;
   height: 16px;
+}
+.bottomFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 16px;
 }
 </style>
